@@ -22,6 +22,8 @@ namespace RouteHelper.ViewModels
     private readonly JournalReader journalReader;
     private readonly IList<string> visitedSystems;
     private Body selectedBody;
+    private int systemCount;
+    private int bodyCount;
 
     public RouteHelperViewModel(JournalReader journalReader)
     {
@@ -44,6 +46,24 @@ namespace RouteHelper.ViewModels
       }
     }
 
+    public int SystemCount
+    {
+      get => systemCount;
+      set
+      {
+        systemCount = value; 
+        NotifyOfPropertyChange();
+      }
+    }
+
+    public int BodyCount
+    {
+      get => bodyCount;
+      set { bodyCount = value;
+        NotifyOfPropertyChange();
+      }
+    }
+
     public void CopyToClipBoard()
     {
       CopyToClipBoard(SelectedBody);
@@ -60,7 +80,6 @@ namespace RouteHelper.ViewModels
     {
       if (close)
       {
-        WriteVisitedToDisk();
         journalReader.Stop();
       }
 
@@ -74,7 +93,19 @@ namespace RouteHelper.ViewModels
       {
         Route.Remove(scannedBody);
         SelectedBody = Route.FirstOrDefault();
+        if (scannedBody.SystemName != SelectedBody?.SystemName)
+        {
+          WriteSystemToDisk(scannedBody.SystemName);
+        }
+
+        Recalculate();
       }
+    }
+
+    private void Recalculate()
+    {
+      BodyCount = Route.Count;
+      SystemCount = Route.Select(x => x.SystemName).Distinct().Count();
     }
 
     private void JournalReaderOnLocationChanged(object sender, Location location)
@@ -111,6 +142,7 @@ namespace RouteHelper.ViewModels
       }
 
       SelectedBody = Route.FirstOrDefault();
+      Recalculate();
       CopyToClipBoard();
     }
 
@@ -138,17 +170,14 @@ namespace RouteHelper.ViewModels
       }
     }
 
-    private void WriteVisitedToDisk()
+    private void WriteSystemToDisk(string system)
     {
       var visitedSystemsPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), Elite, VisitedSystemsFileName);
-      using (var fileStream = File.Open(visitedSystemsPath, FileMode.Truncate, FileAccess.Write))
+      using (var fileStream = File.Open(visitedSystemsPath, FileMode.Append, FileAccess.Write))
       {
         using (var streamWriter = new StreamWriter(fileStream))
         {
-          foreach (var visitedSystem in visitedSystems)
-          {
-            streamWriter.WriteLine(visitedSystem);
-          }
+          streamWriter.WriteLine(system);
         }
       }
     }
