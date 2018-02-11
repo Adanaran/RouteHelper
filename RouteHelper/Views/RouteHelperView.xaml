@@ -24,6 +24,7 @@
           <GridViewColumn Header="Body name" DisplayMemberBinding="{Binding BodyName}" />
           <GridViewColumn Header="Type" DisplayMemberBinding="{Binding Type}" />
           <GridViewColumn Header="Distance" DisplayMemberBinding="{Binding Distance}" />
+          <GridViewColumn Header="Estimated Value" DisplayMemberBinding="{Binding EstimatedScan}"  />
         </GridView>
       </ListView.View>
       <ListBox.Resources>
@@ -70,16 +71,29 @@
       <Grid.ColumnDefinitions>
         <ColumnDefinition Width="Auto" />
         <ColumnDefinition Width="*" />
+        <ColumnDefinition Width="Auto" />
+        <ColumnDefinition Width="*" />
       </Grid.ColumnDefinitions>
       <Grid.RowDefinitions>
         <RowDefinition Height="Auto" />
         <RowDefinition Height="Auto" />
+        <RowDefinition Height="Auto" />
       </Grid.RowDefinitions>
       
-      <TextBlock Grid.Column="0" Grid.Row="0" Margin="0,0,2,0" Text="Systems todo:" />
-      <TextBox Grid.Column="1" Grid.Row="0" Text="{Binding SystemCount}" />
-      <TextBlock Grid.Column="0" Grid.Row="1" Margin="0,0,2,0" Text="Bodies todo:" />
-      <TextBox Grid.Column="1" Grid.Row="1" Text="{Binding BodyCount}" />
+      <TextBlock Grid.Column="0" Grid.Row="0" Margin="0,0,2,0" Text="Systems:" />
+      <TextBox Grid.Column="1" Grid.Row="0" TextAlignment="Right" Text="{Binding SystemCount}" />
+      <TextBlock Grid.Column="2" Grid.Row="0" Margin="2,0,2,0" Text="/" />
+      <TextBox Grid.Column="3" Grid.Row="0" TextAlignment="Right" Text="{Binding AllSystemCount}" />
+
+      <TextBlock Grid.Column="0" Grid.Row="1" Margin="0,0,2,0" Text="Bodies:" />
+      <TextBox Grid.Column="1" Grid.Row="1" TextAlignment="Right" Text="{Binding BodyCount}" />
+      <TextBlock Grid.Column="2" Grid.Row="1" Margin="2,0,2,0" Text="/" />
+      <TextBox Grid.Column="3" Grid.Row="1" TextAlignment="Right" Text="{Binding AllBodyCount}" />
+
+      <TextBlock Grid.Column="0" Grid.Row="2" Margin="0,0,2,0" Text="Estimated:" />
+      <TextBox Grid.Column="1" Grid.Row="2" TextAlignment="Right" Text="{Binding Estimated}" />
+      <TextBlock Grid.Column="2" Grid.Row="2" Margin="2,0,2,0" Text="/" />
+      <TextBox Grid.Column="3" Grid.Row="2" TextAlignment="Right" Text="{Binding AllEstimated}" />
     </Grid>
 
   </Grid>

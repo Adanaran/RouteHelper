@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -24,6 +25,10 @@ namespace RouteHelper.ViewModels
     private Body selectedBody;
     private int systemCount;
     private int bodyCount;
+    private int allSystemCount;
+    private int allBodyCount;
+    private long estimated;
+    private long allEstimated;
 
     public RouteHelperViewModel(JournalReader journalReader)
     {
@@ -51,7 +56,7 @@ namespace RouteHelper.ViewModels
       get => systemCount;
       set
       {
-        systemCount = value; 
+        systemCount = value;
         NotifyOfPropertyChange();
       }
     }
@@ -59,7 +64,49 @@ namespace RouteHelper.ViewModels
     public int BodyCount
     {
       get => bodyCount;
-      set { bodyCount = value;
+      set
+      {
+        bodyCount = value;
+        NotifyOfPropertyChange();
+      }
+    }
+
+    public int AllSystemCount
+    {
+      get => allSystemCount;
+      set
+      {
+        allSystemCount = value;
+        NotifyOfPropertyChange();
+      }
+    }
+
+    public int AllBodyCount
+    {
+      get => allBodyCount;
+      set
+      {
+        allBodyCount = value;
+        NotifyOfPropertyChange();
+      }
+    }
+
+    public string Estimated
+    {
+      get => estimated.ToString("N0");
+      set
+      {
+        long.TryParse(value, NumberStyles.Any, CultureInfo.CurrentCulture, out estimated);
+        NotifyOfPropertyChange();
+      }
+    }
+
+    public string AllEstimated
+    {
+      get => allEstimated.ToString("N0");
+      set
+      {
+        long.TryParse(value, NumberStyles.Any, CultureInfo.CurrentCulture, out allEstimated);
         NotifyOfPropertyChange();
       }
     }
@@ -106,6 +153,8 @@ namespace RouteHelper.ViewModels
     {
       BodyCount = Route.Count;
       SystemCount = Route.Select(x => x.SystemName).Distinct().Count();
+      estimated = Route.Sum(x => x.EstimatedScanValue);
+      NotifyOfPropertyChange(nameof(Estimated));
     }
 
     private void JournalReaderOnLocationChanged(object sender, Location location)
@@ -130,8 +179,11 @@ namespace RouteHelper.ViewModels
       await Task.WhenAll(visitedSystemsTask, routeTask);
 
       var route = routeTask.Result;
+      AllSystemCount = route.Systems.Count;
       foreach (var system in route.Systems)
       {
+        AllBodyCount += system.Bodies.Count;
+        allEstimated += system.Bodies.Sum(b => b.EstimatedScanValue);
         if (!visitedSystems.Contains(system.Name))
         {
           foreach (var body in system.Bodies)
@@ -141,6 +193,7 @@ namespace RouteHelper.ViewModels
         }
       }
 
+      NotifyOfPropertyChange(nameof(AllEstimated));
       SelectedBody = Route.FirstOrDefault();
       Recalculate();
       CopyToClipBoard();
